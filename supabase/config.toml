@@ -18,3 +18,6 @@ email_double_confirm_enabled = false
 
 [functions.analyze-chart]
 verify_jwt = false
+
+[functions.predict-chart]
+verify_jwt = false

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { TrendingUp, Database, Brain, Upload } from 'lucide-react';
+import { TrendingUp, Database, Brain, Upload, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/ImageUpload';
 import { PatternAnalyzer } from '@/components/PatternAnalyzer';
 import { PatternGallery } from '@/components/PatternGallery';
+import ChartPredictor from '@/components/ChartPredictor';
 
 interface ChartImage {
   file: File;
@@ -27,7 +28,7 @@ interface ChartImage {
 const Index = () => {
   const [uploadedImages, setUploadedImages] = useState<Array<{ file: File; preview: string }>>([]);
   const [analyzedImages, setAnalyzedImages] = useState<ChartImage[]>([]);
-  const [currentStep, setCurrentStep] = useState<'upload' | 'analyze' | 'gallery'>('upload');
+  const [currentStep, setCurrentStep] = useState<'upload' | 'analyze' | 'gallery' | 'predict'>('upload');
 
   const handleUploadComplete = (files: Array<{ file: File; preview: string }>) => {
     setUploadedImages(files);
@@ -108,6 +109,15 @@ const Index = () => {
             }`}>
               <Database className="w-4 h-4" />
               <span className="text-sm font-medium">Gallery</span>
+            </div>
+            
+            <div className={`w-8 h-0.5 transition-smooth bg-muted/30`} />
+            
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
+              currentStep === 'predict' ? 'bg-primary/20 text-primary' : 'bg-muted/20 text-muted-foreground'
+            }`}>
+              <Target className="w-4 h-4" />
+              <span className="text-sm font-medium">Predict</span>
             </div>
           </div>
         </div>
@@ -211,6 +221,25 @@ const Index = () => {
               </div>
               
               <PatternGallery images={analyzedImages} />
+            </div>
+          )}
+
+          {currentStep === 'predict' && (
+            <div className="space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-bold text-foreground">AI Chart Prediction</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Upload your current MNQ chart to get AI-powered predictions based on historical patterns and market analysis.
+                </p>
+              </div>
+              
+              <ChartPredictor />
+              
+              <div className="flex justify-center">
+                <Button variant="outline" onClick={resetWorkflow}>
+                  Start Over
+                </Button>
+              </div>
             </div>
           )}
         </div>

@@ -72,6 +72,29 @@ export const PatternAnalyzer = ({ images, onAnalysisComplete }: PatternAnalyzerP
           analysis: analysisResult
         });
 
+        // Store analysis in database for future predictions
+        if (analysisResult?.chart_date) {
+          const { error: insertError } = await supabase
+            .from('chart_analyses')
+            .insert({
+              filename: image.file.name,
+              chart_date: analysisResult.chart_date,
+              day_of_week: analysisResult.day_of_week || 'unknown',
+              pattern_type: analysisResult.pattern_type || 'unknown',
+              confidence_score: analysisResult.confidence_score || 0,
+              price_direction: analysisResult.pattern_features?.trend_direction || 'neutral',
+              key_levels: analysisResult.key_levels || [],
+              pattern_features: analysisResult.pattern_features || {},
+              temporal_patterns: analysisResult.temporal_patterns || {},
+              session_details: analysisResult.session_details || {},
+              seasonal_context: analysisResult.seasonal_context || {}
+            });
+          
+          if (insertError) {
+            console.error('Error storing analysis:', insertError);
+          }
+        }
+
         // Small delay to show progress
         await new Promise(resolve => setTimeout(resolve, 500));
       }
