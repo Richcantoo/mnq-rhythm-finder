@@ -35,23 +35,27 @@ serve(async (req) => {
             role: 'system',
             content: `You are an expert MNQ (Micro E-Mini NASDAQ-100) futures trading analyst. Analyze the provided 5-minute chart image and identify:
 
-1. Pattern Type: Classify the main pattern (bullish breakout, bearish breakdown, reversal, continuation, consolidation, volume spike)
-2. Confidence Score: Rate your confidence (0.0-1.0) in the pattern identification
-3. Session Time: Determine the likely trading session (pre-market, market-open, lunch, power-hour, after-hours)
-4. Key Levels: Identify support/resistance levels with strength ratings
-5. Pattern Features: Analyze trend direction, volume profile, volatility
+1. Chart Date: Extract the exact date from the chart (look for date stamps, time axes, or any visible date information)
+2. Pattern Type: Classify the main pattern (bullish_breakout, bearish_breakdown, reversal, continuation, consolidation, volume_spike)
+3. Confidence Score: Rate your confidence (0.0-1.0) in the pattern identification
+4. Session Time: Determine the likely trading session (pre-market, market-open, lunch, power-hour, after-hours)
+5. Day of Week: Determine which day of the week this chart represents
+6. Key Levels: Identify support/resistance levels with strength ratings
+7. Pattern Features: Analyze trend direction, volume profile, volatility
 
-Respond in JSON format only with this structure:
+CRITICAL: Respond with valid JSON only. No markdown formatting, no code blocks, no extra text. Just pure JSON:
 {
+  "chart_date": "YYYY-MM-DD",
+  "day_of_week": "monday/tuesday/wednesday/thursday/friday",
   "pattern_type": "string",
-  "confidence_score": number,
-  "session_time": "string", 
-  "key_levels": [{"type": "support/resistance", "price": number, "strength": number}],
+  "confidence_score": 0.8,
+  "session_time": "string",
+  "key_levels": [{"type": "support", "price": 12345.67, "strength": 0.8}],
   "pattern_features": {
     "trend_direction": "string",
-    "volume_profile": "string", 
+    "volume_profile": "string",
     "volatility": "string",
-    "support_resistance": [{"level": number, "strength": number}]
+    "support_resistance": [{"level": 12345.67, "strength": 0.8}]
   }
 }`
           },
@@ -61,11 +65,15 @@ Respond in JSON format only with this structure:
               {
                 type: 'text',
                 text: `Analyze this MNQ 5-minute chart for trading patterns and opportunities. Focus on:
+- Extract the exact chart date from any visible timestamps or date information
+- Determine the day of the week from the chart date
 - Price action patterns and trend analysis
 - Volume characteristics and spikes
 - Support and resistance levels
 - Session timing patterns
-- Trading opportunities`
+- Trading opportunities
+
+Return only valid JSON without any markdown formatting.`
               },
               {
                 type: 'image_url',
@@ -118,11 +126,25 @@ Respond in JSON format only with this structure:
     // Parse the JSON response from AI
     let analysis;
     try {
-      analysis = JSON.parse(aiResponse);
+      // Clean the response to remove any markdown formatting
+      let cleanResponse = aiResponse.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      }
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      }
+      
+      analysis = JSON.parse(cleanResponse);
     } catch (parseError) {
       console.error('Failed to parse AI response:', aiResponse);
       // Fallback analysis if JSON parsing fails
+      const currentDate = new Date().toISOString().split('T')[0];
+      const dayOfWeek = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      
       analysis = {
+        chart_date: currentDate,
+        day_of_week: dayOfWeek,
         pattern_type: "neutral",
         confidence_score: 0.5,
         session_time: "market-open",

@@ -10,6 +10,8 @@ interface ChartImage {
   file: File;
   preview: string;
   analysis?: {
+    chart_date?: string;
+    day_of_week?: string;
     pattern_type: string;
     confidence_score: number;
     session_time: string;
@@ -31,12 +33,14 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patternFilter, setPatternFilter] = useState('all');
   const [sessionFilter, setSessionFilter] = useState('all');
+  const [dayFilter, setDayFilter] = useState('all');
   const [selectedImage, setSelectedImage] = useState<ChartImage | null>(null);
 
   const filteredImages = useMemo(() => {
     return images.filter(image => {
       const matchesSearch = image.file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           image.analysis?.pattern_type?.toLowerCase().includes(searchTerm.toLowerCase());
+                           image.analysis?.pattern_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           image.analysis?.chart_date?.includes(searchTerm);
       
       const matchesPattern = patternFilter === 'all' || 
                             image.analysis?.pattern_type?.toLowerCase().includes(patternFilter.toLowerCase());
@@ -44,9 +48,12 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
       const matchesSession = sessionFilter === 'all' || 
                             image.analysis?.session_time === sessionFilter;
 
-      return matchesSearch && matchesPattern && matchesSession;
+      const matchesDay = dayFilter === 'all' || 
+                        image.analysis?.day_of_week === dayFilter;
+
+      return matchesSearch && matchesPattern && matchesSession && matchesDay;
     });
-  }, [images, searchTerm, patternFilter, sessionFilter]);
+  }, [images, searchTerm, patternFilter, sessionFilter, dayFilter]);
 
   const getPatternIcon = (patternType: string) => {
     switch (patternType?.toLowerCase()) {
@@ -94,7 +101,7 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
         </CardTitle>
         
         {/* Search and Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
             <Input
@@ -129,6 +136,20 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
               <SelectItem value="lunch">Lunch Hour</SelectItem>
               <SelectItem value="power-hour">Power Hour</SelectItem>
               <SelectItem value="after-hours">After Hours</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={dayFilter} onValueChange={setDayFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Day of week" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Days</SelectItem>
+              <SelectItem value="monday">Monday</SelectItem>
+              <SelectItem value="tuesday">Tuesday</SelectItem>
+              <SelectItem value="wednesday">Wednesday</SelectItem>
+              <SelectItem value="thursday">Thursday</SelectItem>
+              <SelectItem value="friday">Friday</SelectItem>
             </SelectContent>
           </Select>
           
@@ -192,6 +213,14 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
                   
                   {image.analysis && (
                     <div className="space-y-2">
+                      {image.analysis.chart_date && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(image.analysis.chart_date).toLocaleDateString()} 
+                          {image.analysis.day_of_week && ` (${image.analysis.day_of_week})`}
+                        </div>
+                      )}
+                      
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         {image.analysis.session_time}
