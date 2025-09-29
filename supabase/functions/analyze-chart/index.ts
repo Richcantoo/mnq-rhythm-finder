@@ -35,6 +35,13 @@ serve(async (req) => {
             role: 'system',
             content: `You are an expert MNQ (Micro E-Mini NASDAQ-100) futures trading analyst. Analyze the provided 5-minute chart image and extract comprehensive temporal data to identify price movement patterns.
 
+CRITICAL DATE EXTRACTION:
+- Look carefully at ALL visible dates on the chart - headers, axes, watermarks, timestamps
+- The chart date is the TRADING DATE, not the screenshot date
+- Futures trading sessions: Sunday 1800 to Monday 1600, Monday 1800 to Tuesday 1600, etc.
+- If you see a date like "9/26/2025" on the chart, use that exact date
+- Day of week must match the extracted date (9/26/2025 = Friday)
+
 TEMPORAL EXTRACTION REQUIREMENTS:
 1. Chart Date & Time: Extract exact date and all visible time stamps from chart axes, headers, or watermarks
 2. Time Range: Identify the start and end times visible on the chart
@@ -125,8 +132,8 @@ Return only valid JSON without any markdown formatting.`
             ]
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.3
+        max_tokens: 1500,
+        temperature: 0.1
       }),
     });
 
@@ -169,11 +176,21 @@ Return only valid JSON without any markdown formatting.`
     try {
       // Clean the response to remove any markdown formatting
       let cleanResponse = aiResponse.trim();
+      
+      // Remove markdown code blocks
       if (cleanResponse.startsWith('```json')) {
         cleanResponse = cleanResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
       }
       if (cleanResponse.startsWith('```')) {
         cleanResponse = cleanResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      }
+      
+      // Find the JSON object start and end
+      const jsonStart = cleanResponse.indexOf('{');
+      const jsonEnd = cleanResponse.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
       }
       
       analysis = JSON.parse(cleanResponse);
