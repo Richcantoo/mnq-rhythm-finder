@@ -9,6 +9,7 @@ import { EnhancedPatternGallery } from '@/components/EnhancedPatternGallery';
 import ChartPredictor from '@/components/ChartPredictor';
 import { EnhancedProgressNav } from '@/components/EnhancedProgressNav';
 import { MobileOptimizedHeader } from '@/components/MobileOptimizedHeader';
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 
 interface ChartImage {
   file: File;
@@ -184,11 +185,13 @@ const Index = () => {
           {currentStep === 'predict' && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-foreground">AI Chart Prediction</h2>
+                <h2 className="text-2xl font-bold text-foreground">AI Predictions & Analytics</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Upload your current MNQ chart to get AI-powered predictions based on historical patterns and market analysis.
+                  Get AI-powered predictions and view comprehensive analytics of your pattern database.
                 </p>
               </div>
+              
+              <AnalyticsDashboard />
               
               <ChartPredictor />
               

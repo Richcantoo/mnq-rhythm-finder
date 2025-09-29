@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_summaries: {
+        Row: {
+          created_at: string
+          id: string
+          metric_data: Json
+          metric_date: string
+          metric_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_data: Json
+          metric_date: string
+          metric_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_data?: Json
+          metric_date?: string
+          metric_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chart_analyses: {
         Row: {
           chart_date: string
@@ -154,6 +181,182 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      pattern_cluster_members: {
+        Row: {
+          added_at: string
+          chart_analysis_id: string | null
+          cluster_id: string | null
+          id: string
+          membership_confidence: number | null
+        }
+        Insert: {
+          added_at?: string
+          chart_analysis_id?: string | null
+          cluster_id?: string | null
+          id?: string
+          membership_confidence?: number | null
+        }
+        Update: {
+          added_at?: string
+          chart_analysis_id?: string | null
+          cluster_id?: string | null
+          id?: string
+          membership_confidence?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pattern_cluster_members_chart_analysis_id_fkey"
+            columns: ["chart_analysis_id"]
+            isOneToOne: true
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pattern_cluster_members_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "pattern_clusters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pattern_clusters: {
+        Row: {
+          cluster_description: string | null
+          cluster_features: Json | null
+          cluster_name: string
+          confidence_threshold: number | null
+          created_at: string
+          id: string
+          success_rate: number | null
+          total_patterns: number | null
+          updated_at: string
+        }
+        Insert: {
+          cluster_description?: string | null
+          cluster_features?: Json | null
+          cluster_name: string
+          confidence_threshold?: number | null
+          created_at?: string
+          id?: string
+          success_rate?: number | null
+          total_patterns?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cluster_description?: string | null
+          cluster_features?: Json | null
+          cluster_name?: string
+          confidence_threshold?: number | null
+          created_at?: string
+          id?: string
+          success_rate?: number | null
+          total_patterns?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pattern_similarities: {
+        Row: {
+          algorithm_used: string
+          computed_at: string
+          id: string
+          similarity_features: Json | null
+          similarity_score: number
+          source_chart_id: string | null
+          target_chart_id: string | null
+        }
+        Insert: {
+          algorithm_used?: string
+          computed_at?: string
+          id?: string
+          similarity_features?: Json | null
+          similarity_score?: number
+          source_chart_id?: string | null
+          target_chart_id?: string | null
+        }
+        Update: {
+          algorithm_used?: string
+          computed_at?: string
+          id?: string
+          similarity_features?: Json | null
+          similarity_score?: number
+          source_chart_id?: string | null
+          target_chart_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pattern_similarities_source_chart_id_fkey"
+            columns: ["source_chart_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pattern_similarities_target_chart_id_fkey"
+            columns: ["target_chart_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_outcomes: {
+        Row: {
+          actual_outcome: string | null
+          actual_price: number | null
+          chart_analysis_id: string | null
+          confidence_score: number
+          created_at: string
+          id: string
+          outcome_notes: string | null
+          predicted_at: string
+          predicted_direction: string
+          price_target: number | null
+          time_horizon_hours: number | null
+          updated_at: string
+          validated_at: string | null
+        }
+        Insert: {
+          actual_outcome?: string | null
+          actual_price?: number | null
+          chart_analysis_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          outcome_notes?: string | null
+          predicted_at?: string
+          predicted_direction: string
+          price_target?: number | null
+          time_horizon_hours?: number | null
+          updated_at?: string
+          validated_at?: string | null
+        }
+        Update: {
+          actual_outcome?: string | null
+          actual_price?: number | null
+          chart_analysis_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          outcome_notes?: string | null
+          predicted_at?: string
+          predicted_direction?: string
+          price_target?: number | null
+          time_horizon_hours?: number | null
+          updated_at?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_outcomes_chart_analysis_id_fkey"
+            columns: ["chart_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

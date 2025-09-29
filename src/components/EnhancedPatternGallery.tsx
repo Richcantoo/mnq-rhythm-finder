@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { SuccessRateTracker } from '@/components/SuccessRateTracker';
+import { PatternSimilarity } from '@/components/PatternSimilarity';
 
 interface ChartImage {
   file: File;
@@ -280,7 +282,18 @@ export function EnhancedPatternGallery({ images }: EnhancedPatternGalleryProps) 
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 Clear All
               </Button>
+          </div>
+
+          {/* Pattern Similarity Analysis */}
+          {selectedForComparison.size > 0 && (
+            <div className="mt-6">
+              <PatternSimilarity
+                sourceChartId={Array.from(selectedForComparison)[0].toString()}
+                sourcePattern={filteredAndSortedImages[Array.from(selectedForComparison)[0]]?.analysis?.pattern_type || ''}
+                targetChartIds={Array.from(selectedForComparison).slice(1).map(i => i.toString())}
+              />
             </div>
+          )}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -369,7 +382,7 @@ export function EnhancedPatternGallery({ images }: EnhancedPatternGalleryProps) 
                 step={5}
                 className="w-full"
               />
-            </div>
+                     </div>
           </CardContent>
         </Card>
       )}
