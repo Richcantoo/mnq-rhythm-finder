@@ -58,39 +58,24 @@ const COLORS = {
 };
 
 export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [successRateData, setSuccessRateData] = useState<SuccessRateData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30d');
+  const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
 
   useEffect(() => {
-    loadAnalyticsData();
-  }, [timeRange]);
+    fetchAnalyticsData();
+  }, []);
 
-  const loadAnalyticsData = async () => {
+  const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-
-      // Load dashboard data
-      const { data: dashboardResult, error: dashboardError } = await supabase.functions.invoke('analytics-engine', {
-        body: { action: 'get_analytics_dashboard' }
+      const { data, error } = await supabase.functions.invoke('analytics-engine', {
+        body: { action: 'getAnalyticsDashboard' }
       });
 
-      if (dashboardError) throw dashboardError;
-
-      // Load success rate data
-      const { data: successResult, error: successError } = await supabase.functions.invoke('analytics-engine', {
-        body: { 
-          action: 'get_success_rates',
-          data: { timeRange }
-        }
-      });
-
-      if (successError) throw successError;
-
-      setDashboardData(dashboardResult);
-      setSuccessRateData(successResult);
+      if (error) throw error;
+      setAnalyticsData(data);
 
     } catch (error) {
       console.error('Error loading analytics:', error);
@@ -118,7 +103,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
       });
 
       // Reload data
-      loadAnalyticsData();
+      fetchAnalyticsData();
 
     } catch (error) {
       console.error('Error generating clusters:', error);
@@ -149,12 +134,12 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
     );
   }
 
-  if (!dashboardData || !successRateData) {
+  if (!analyticsData) {
     return (
       <div className={cn("flex items-center justify-center h-64", className)}>
         <div className="text-center">
           <p className="text-muted-foreground mb-4">No analytics data available</p>
-          <Button onClick={loadAnalyticsData}>
+          <Button onClick={fetchAnalyticsData}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Retry Loading
           </Button>
@@ -163,43 +148,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
     );
   }
 
-  // Prepare chart data
-  const patternTypeData = Object.entries(dashboardData.patternTypeCounts).map(([type, count]) => ({
-    name: type,
-    value: count,
-    percentage: ((count / dashboardData.totalPatterns) * 100).toFixed(1)
-  }));
-
-  const confidenceData = [
-    { name: 'High (80%+)', value: dashboardData.confidenceDistribution.high, color: COLORS.bullish },
-    { name: 'Medium (60-79%)', value: dashboardData.confidenceDistribution.medium, color: COLORS.primary },
-    { name: 'Low (<60%)', value: dashboardData.confidenceDistribution.low, color: COLORS.bearish }
-  ];
-
-  const successByPatternData = Object.entries(successRateData.by_pattern).map(([pattern, data]) => ({
-    pattern,
-    success_rate: data.success_rate,
-    total: data.total,
-    successful: data.successful
-  }));
-
-  const successByConfidenceData = [
-    { 
-      name: 'High Confidence', 
-      success_rate: successRateData.by_confidence.high.success_rate,
-      total: successRateData.by_confidence.high.total
-    },
-    { 
-      name: 'Medium Confidence', 
-      success_rate: successRateData.by_confidence.medium.success_rate,
-      total: successRateData.by_confidence.medium.total
-    },
-    { 
-      name: 'Low Confidence', 
-      success_rate: successRateData.by_confidence.low.success_rate,
-      total: successRateData.by_confidence.low.total
-    }
-  ];
+  const { totalPatterns, patternsByType, confidenceDistribution, successRate, recentActivity, sessionTimeDistribution, topPerformingPatterns } = analyticsData;
 
   return (
     <div className={cn("space-y-6", className)}>
