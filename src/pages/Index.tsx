@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/ImageUpload';
 import { PatternAnalyzer } from '@/components/PatternAnalyzer';
-import { PatternGallery } from '@/components/PatternGallery';
+import { EnhancedPatternGallery } from '@/components/EnhancedPatternGallery';
 import ChartPredictor from '@/components/ChartPredictor';
+import { EnhancedProgressNav } from '@/components/EnhancedProgressNav';
+import { MobileOptimizedHeader } from '@/components/MobileOptimizedHeader';
 
 interface ChartImage {
   file: File;
@@ -47,87 +49,28 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-chart">
-      {/* Header */}
-      <header className="border-b border-border/20 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <TrendingUp className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">MNQ Rhythm Finder</h1>
-                <p className="text-sm text-muted-foreground">AI-Powered Chart Pattern Recognition</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="gap-1">
-                <Brain className="w-3 h-3" />
-                AI-Powered
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Database className="w-3 h-3" />
-                Lovable Cloud
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-chart animate-fade-in">
+      {/* Enhanced Mobile-Optimized Header */}
+      <MobileOptimizedHeader
+        currentStep={currentStep}
+        uploadedCount={uploadedImages.length}
+        analyzedCount={analyzedImages.length}
+        onReset={resetWorkflow}
+      />
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Progress Indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
-              currentStep === 'upload' ? 'bg-primary/20 text-primary' : 
-              uploadedImages.length > 0 ? 'bg-bullish/20 text-bullish' : 'bg-muted/20 text-muted-foreground'
-            }`}>
-              <Upload className="w-4 h-4" />
-              <span className="text-sm font-medium">Upload</span>
-            </div>
-            
-            <div className={`w-8 h-0.5 transition-smooth ${
-              uploadedImages.length > 0 ? 'bg-primary' : 'bg-muted/30'
-            }`} />
-            
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
-              currentStep === 'analyze' ? 'bg-primary/20 text-primary' : 
-              analyzedImages.length > 0 ? 'bg-bullish/20 text-bullish' : 'bg-muted/20 text-muted-foreground'
-            }`}>
-              <Brain className="w-4 h-4" />
-              <span className="text-sm font-medium">Analyze</span>
-            </div>
-            
-            <div className={`w-8 h-0.5 transition-smooth ${
-              analyzedImages.length > 0 ? 'bg-primary' : 'bg-muted/30'
-            }`} />
-            
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth cursor-pointer ${
-                currentStep === 'gallery' ? 'bg-primary/20 text-primary' : 
-                analyzedImages.length > 0 ? 'bg-bullish/20 text-bullish hover:bg-bullish/30' : 'bg-muted/20 text-muted-foreground'
-              }`} onClick={() => analyzedImages.length > 0 && setCurrentStep('gallery')}>
-                <Database className="w-4 h-4" />
-                <span className="text-sm font-medium">Gallery</span>
-              </div>
-              
-              <div className={`w-8 h-0.5 transition-smooth ${
-                analyzedImages.length > 0 ? 'bg-primary' : 'bg-muted/30'
-              }`} />
-              
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth cursor-pointer ${
-                currentStep === 'predict' ? 'bg-primary/20 text-primary' : 
-                analyzedImages.length > 0 ? 'bg-bullish/20 text-bullish hover:bg-bullish/30' : 'bg-muted/20 text-muted-foreground'
-              }`} onClick={() => analyzedImages.length > 0 && setCurrentStep('predict')}>
-                <Target className="w-4 h-4" />
-                <span className="text-sm font-medium">Predict</span>
-              </div>
-          </div>
+      <main className="container mx-auto px-4 py-4 md:py-8">
+        {/* Enhanced Progress Navigation */}
+        <div className="mb-6 md:mb-8">
+          <EnhancedProgressNav
+            currentStep={currentStep}
+            uploadedCount={uploadedImages.length}
+            analyzedCount={analyzedImages.length}
+            onStepChange={setCurrentStep}
+          />
         </div>
 
         {/* Main Content */}
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
           {currentStep === 'upload' && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
@@ -141,7 +84,7 @@ const Index = () => {
               <ImageUpload onUploadComplete={handleUploadComplete} />
               
               {/* Features Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 md:mt-8">
                 <Card className="bg-card/30 border-border/30">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -224,7 +167,7 @@ const Index = () => {
                 </Button>
               </div>
               
-              <PatternGallery images={analyzedImages} />
+              <EnhancedPatternGallery images={analyzedImages} />
               
               <div className="flex justify-center mt-6">
                 <Button 
