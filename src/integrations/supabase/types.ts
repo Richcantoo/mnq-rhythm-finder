@@ -53,6 +53,7 @@ export type Database = {
           pattern_features: Json | null
           pattern_type: string
           price_direction: string | null
+          search_vector: unknown | null
           seasonal_context: Json | null
           session_details: Json | null
           temporal_patterns: Json | null
@@ -69,6 +70,7 @@ export type Database = {
           pattern_features?: Json | null
           pattern_type: string
           price_direction?: string | null
+          search_vector?: unknown | null
           seasonal_context?: Json | null
           session_details?: Json | null
           temporal_patterns?: Json | null
@@ -85,12 +87,49 @@ export type Database = {
           pattern_features?: Json | null
           pattern_type?: string
           price_direction?: string | null
+          search_vector?: unknown | null
           seasonal_context?: Json | null
           session_details?: Json | null
           temporal_patterns?: Json | null
           updated_at?: string
         }
         Relationships: []
+      }
+      chart_analysis_tags: {
+        Row: {
+          added_at: string
+          chart_analysis_id: string | null
+          id: string
+          tag_id: string | null
+        }
+        Insert: {
+          added_at?: string
+          chart_analysis_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Update: {
+          added_at?: string
+          chart_analysis_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_analysis_tags_chart_analysis_id_fkey"
+            columns: ["chart_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_analysis_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "pattern_tags"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chart_images: {
         Row: {
@@ -152,6 +191,42 @@ export type Database = {
           updated_at?: string
           upload_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      export_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          export_criteria: Json
+          export_type: string
+          file_path: string | null
+          id: string
+          record_count: number | null
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_criteria: Json
+          export_type: string
+          file_path?: string | null
+          id?: string
+          record_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_criteria?: Json
+          export_type?: string
+          file_path?: string | null
+          id?: string
+          record_count?: number | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -257,6 +332,47 @@ export type Database = {
         }
         Relationships: []
       }
+      pattern_notes: {
+        Row: {
+          chart_analysis_id: string | null
+          created_at: string
+          id: string
+          is_private: boolean | null
+          note_content: string
+          note_title: string | null
+          note_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          chart_analysis_id?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          note_content: string
+          note_title?: string | null
+          note_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          chart_analysis_id?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean | null
+          note_content?: string
+          note_title?: string | null
+          note_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pattern_notes_chart_analysis_id_fkey"
+            columns: ["chart_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pattern_similarities: {
         Row: {
           algorithm_used: string
@@ -301,6 +417,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pattern_tags: {
+        Row: {
+          color_hex: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color_hex?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color_hex?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       prediction_outcomes: {
         Row: {
@@ -357,6 +500,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_searches: {
+        Row: {
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          search_criteria: Json
+          search_description: string | null
+          search_name: string
+          updated_at: string
+          use_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          search_criteria: Json
+          search_description?: string | null
+          search_name: string
+          updated_at?: string
+          use_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          search_criteria?: Json
+          search_description?: string | null
+          search_name?: string
+          updated_at?: string
+          use_count?: number | null
+        }
+        Relationships: []
       }
     }
     Views: {
