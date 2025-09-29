@@ -132,7 +132,7 @@ Return only valid JSON without any markdown formatting.`
             ]
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 2000,
         temperature: 0.1
       }),
     });
@@ -196,9 +196,21 @@ Return only valid JSON without any markdown formatting.`
       analysis = JSON.parse(cleanResponse);
     } catch (parseError) {
       console.error('Failed to parse AI response:', aiResponse);
-      // Fallback analysis if JSON parsing fails
-      const currentDate = new Date().toISOString().split('T')[0];
-      const dayOfWeek = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      console.error('Parse error:', parseError);
+      
+      // Try to extract date information even from partial response
+      let extractedDate = null;
+      let extractedDay = null;
+      
+      const dateMatch = aiResponse.match(/"chart_date":\s*"([^"]+)"/);
+      const dayMatch = aiResponse.match(/"day_of_week":\s*"([^"]+)"/);
+      
+      if (dateMatch) extractedDate = dateMatch[1];
+      if (dayMatch) extractedDay = dayMatch[1];
+      
+      // Use extracted date if available, otherwise fallback
+      const currentDate = extractedDate || new Date().toISOString().split('T')[0];
+      const dayOfWeek = extractedDay || new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
       
       analysis = {
         chart_date: currentDate,
