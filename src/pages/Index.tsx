@@ -104,21 +104,25 @@ const Index = () => {
               analyzedImages.length > 0 ? 'bg-primary' : 'bg-muted/30'
             }`} />
             
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
-              currentStep === 'gallery' ? 'bg-primary/20 text-primary' : 'bg-muted/20 text-muted-foreground'
-            }`}>
-              <Database className="w-4 h-4" />
-              <span className="text-sm font-medium">Gallery</span>
-            </div>
-            
-            <div className={`w-8 h-0.5 transition-smooth bg-muted/30`} />
-            
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
-              currentStep === 'predict' ? 'bg-primary/20 text-primary' : 'bg-muted/20 text-muted-foreground'
-            }`}>
-              <Target className="w-4 h-4" />
-              <span className="text-sm font-medium">Predict</span>
-            </div>
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth cursor-pointer ${
+                currentStep === 'gallery' ? 'bg-primary/20 text-primary' : 
+                analyzedImages.length > 0 ? 'bg-bullish/20 text-bullish hover:bg-bullish/30' : 'bg-muted/20 text-muted-foreground'
+              }`} onClick={() => analyzedImages.length > 0 && setCurrentStep('gallery')}>
+                <Database className="w-4 h-4" />
+                <span className="text-sm font-medium">Gallery</span>
+              </div>
+              
+              <div className={`w-8 h-0.5 transition-smooth ${
+                analyzedImages.length > 0 ? 'bg-primary' : 'bg-muted/30'
+              }`} />
+              
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth cursor-pointer ${
+                currentStep === 'predict' ? 'bg-primary/20 text-primary' : 
+                analyzedImages.length > 0 ? 'bg-bullish/20 text-bullish hover:bg-bullish/30' : 'bg-muted/20 text-muted-foreground'
+              }`} onClick={() => analyzedImages.length > 0 && setCurrentStep('predict')}>
+                <Target className="w-4 h-4" />
+                <span className="text-sm font-medium">Predict</span>
+              </div>
           </div>
         </div>
 
@@ -221,6 +225,16 @@ const Index = () => {
               </div>
               
               <PatternGallery images={analyzedImages} />
+              
+              <div className="flex justify-center mt-6">
+                <Button 
+                  onClick={() => setCurrentStep('predict')}
+                  className="gap-2"
+                >
+                  <Target className="w-4 h-4" />
+                  Get AI Predictions
+                </Button>
+              </div>
             </div>
           )}
 
