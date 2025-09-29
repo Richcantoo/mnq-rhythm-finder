@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      chart_analyses: {
+        Row: {
+          chart_date: string
+          confidence_score: number
+          created_at: string
+          day_of_week: string
+          filename: string
+          id: string
+          key_levels: Json | null
+          pattern_features: Json | null
+          pattern_type: string
+          price_direction: string | null
+          seasonal_context: Json | null
+          session_details: Json | null
+          temporal_patterns: Json | null
+          updated_at: string
+        }
+        Insert: {
+          chart_date: string
+          confidence_score: number
+          created_at?: string
+          day_of_week: string
+          filename: string
+          id?: string
+          key_levels?: Json | null
+          pattern_features?: Json | null
+          pattern_type: string
+          price_direction?: string | null
+          seasonal_context?: Json | null
+          session_details?: Json | null
+          temporal_patterns?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          chart_date?: string
+          confidence_score?: number
+          created_at?: string
+          day_of_week?: string
+          filename?: string
+          id?: string
+          key_levels?: Json | null
+          pattern_features?: Json | null
+          pattern_type?: string
+          price_direction?: string | null
+          seasonal_context?: Json | null
+          session_details?: Json | null
+          temporal_patterns?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chart_images: {
         Row: {
           ai_analysis: Json | null
