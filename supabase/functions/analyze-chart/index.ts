@@ -33,29 +33,70 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert MNQ (Micro E-Mini NASDAQ-100) futures trading analyst. Analyze the provided 5-minute chart image and identify:
+            content: `You are an expert MNQ (Micro E-Mini NASDAQ-100) futures trading analyst. Analyze the provided 5-minute chart image and extract comprehensive temporal data to identify price movement patterns.
 
-1. Chart Date: Extract the exact date from the chart (look for date stamps, time axes, or any visible date information)
-2. Pattern Type: Classify the main pattern (bullish_breakout, bearish_breakdown, reversal, continuation, consolidation, volume_spike)
-3. Confidence Score: Rate your confidence (0.0-1.0) in the pattern identification
-4. Session Time: Determine the likely trading session (pre-market, market-open, lunch, power-hour, after-hours)
-5. Day of Week: Determine which day of the week this chart represents
-6. Key Levels: Identify support/resistance levels with strength ratings
-7. Pattern Features: Analyze trend direction, volume profile, volatility
+TEMPORAL EXTRACTION REQUIREMENTS:
+1. Chart Date & Time: Extract exact date and all visible time stamps from chart axes, headers, or watermarks
+2. Time Range: Identify the start and end times visible on the chart
+3. Session Context: Determine trading session and precise time periods
+4. Day of Week Analysis: Correlate price movements with specific weekday patterns
 
-CRITICAL: Respond with valid JSON only. No markdown formatting, no code blocks, no extra text. Just pure JSON:
+PATTERN CORRELATION ANALYSIS:
+- Time-of-day patterns: Identify price movements at specific hours/minutes
+- Day-of-week correlations: Note patterns specific to weekdays
+- Intraday momentum: Track price direction changes throughout the session
+- Volume-time relationships: Correlate volume spikes with specific times
+- Volatility timing: Identify when highest/lowest volatility occurs
+
+RESPONSE FORMAT (JSON only, no markdown):
 {
   "chart_date": "YYYY-MM-DD",
   "day_of_week": "monday/tuesday/wednesday/thursday/friday",
+  "time_range": {
+    "start_time": "HH:MM",
+    "end_time": "HH:MM",
+    "timezone": "EST/CST/PST"
+  },
+  "session_details": {
+    "primary_session": "pre-market/market-open/lunch/power-hour/after-hours",
+    "session_times": ["09:30-10:00", "10:00-11:00"],
+    "session_characteristics": "string description"
+  },
+  "temporal_patterns": {
+    "hourly_movements": [
+      {
+        "time": "09:30",
+        "price_change": "+15.2",
+        "direction": "bullish",
+        "confidence": 0.8,
+        "volume_correlation": "high"
+      }
+    ],
+    "day_of_week_bias": {
+      "pattern": "string description",
+      "historical_tendency": "bullish/bearish/neutral",
+      "confidence": 0.7
+    },
+    "intraday_rhythm": {
+      "morning_bias": "bullish/bearish/neutral",
+      "lunch_behavior": "consolidation/breakout/reversal",
+      "afternoon_momentum": "continuation/reversal"
+    }
+  },
   "pattern_type": "string",
   "confidence_score": 0.8,
-  "session_time": "string",
-  "key_levels": [{"type": "support", "price": 12345.67, "strength": 0.8}],
+  "key_levels": [{"type": "support", "price": 12345.67, "strength": 0.8, "time_tested": "HH:MM"}],
   "pattern_features": {
     "trend_direction": "string",
     "volume_profile": "string",
     "volatility": "string",
-    "support_resistance": [{"level": 12345.67, "strength": 0.8}]
+    "price_velocity": "fast/moderate/slow",
+    "support_resistance": [{"level": 12345.67, "strength": 0.8, "time_formed": "HH:MM"}]
+  },
+  "seasonal_context": {
+    "month": "january/february/etc",
+    "quarter": "Q1/Q2/Q3/Q4",
+    "seasonal_bias": "string if applicable"
   }
 }`
           },
