@@ -47,16 +47,39 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        // Trading Platform Colors
+        bullish: {
+          DEFAULT: "hsl(var(--bullish))",
+          foreground: "hsl(var(--bullish-foreground))",
         },
+        bearish: {
+          DEFAULT: "hsl(var(--bearish))",
+          foreground: "hsl(var(--bearish-foreground))",
+        },
+        neutral: {
+          DEFAULT: "hsl(var(--neutral))",
+          foreground: "hsl(var(--neutral-foreground))",
+        },
+        chart: {
+          bg: "hsl(var(--chart-bg))",
+          grid: "hsl(var(--grid-line))",
+          price: "hsl(var(--price-line))",
+        },
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-bullish": "var(--gradient-bullish)",
+        "gradient-bearish": "var(--gradient-bearish)",
+        "gradient-chart": "var(--gradient-chart)",
+      },
+      boxShadow: {
+        glow: "var(--shadow-glow)",
+        card: "var(--shadow-card)",
+        elevation: "var(--shadow-elevation)",
+      },
+      transitionProperty: {
+        smooth: "var(--transition-smooth)",
+        fast: "var(--transition-fast)",
       },
       borderRadius: {
         lg: "var(--radius)",
