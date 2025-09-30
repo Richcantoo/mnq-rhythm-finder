@@ -342,6 +342,7 @@ export type Database = {
           note_title: string | null
           note_type: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           chart_analysis_id?: string | null
@@ -352,6 +353,7 @@ export type Database = {
           note_title?: string | null
           note_type?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           chart_analysis_id?: string | null
@@ -362,6 +364,7 @@ export type Database = {
           note_title?: string | null
           note_type?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

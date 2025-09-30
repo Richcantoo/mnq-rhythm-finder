@@ -20,6 +20,24 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Extract user from authorization header
+    const authHeader = req.headers.get('Authorization');
+    let userId = null;
+    
+    if (authHeader) {
+      try {
+        const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+        const userClient = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: authHeader } }
+        });
+        
+        const { data: { user } } = await userClient.auth.getUser();
+        userId = user?.id || null;
+      } catch (err) {
+        console.error('Error extracting user from token:', err);
+      }
+    }
+
     let result = {};
 
     switch (action) {
@@ -48,11 +66,11 @@ serve(async (req) => {
         break;
         
       case 'add_pattern_note':
-        result = await addPatternNote(supabase, data);
+        result = await addPatternNote(supabase, data, userId);
         break;
         
       case 'get_pattern_notes':
-        result = await getPatternNotes(supabase, data);
+        result = await getPatternNotes(supabase, data, userId);
         break;
         
       case 'manage_tags':
@@ -412,9 +430,14 @@ async function getSavedSearches(supabase: any) {
   }
 }
 
-async function addPatternNote(supabase: any, data: any) {
+async function addPatternNote(supabase: any, data: any, userId: string | null) {
   try {
     const { chartAnalysisId, noteTitle, noteContent, noteType, isPrivate } = data;
+    
+    // Require authentication for creating notes
+    if (!userId) {
+      throw new Error('Authentication required to create notes');
+    }
     
     const { data: note, error } = await supabase
       .from('pattern_notes')
@@ -423,7 +446,8 @@ async function addPatternNote(supabase: any, data: any) {
         note_title: noteTitle,
         note_content: noteContent,
         note_type: noteType || 'general',
-        is_private: isPrivate !== false // default to true
+        is_private: isPrivate !== false, // default to true
+        user_id: userId // Include the authenticated user's ID
       })
       .select()
       .single();
@@ -441,15 +465,28 @@ async function addPatternNote(supabase: any, data: any) {
   }
 }
 
-async function getPatternNotes(supabase: any, data: any) {
+async function getPatternNotes(supabase: any, data: any, userId: string | null) {
   try {
     const { chartAnalysisId } = data;
     
-    const { data: notes, error } = await supabase
+    // Build query with RLS-like filtering
+    // Show: user's own notes (all) + other users' public notes
+    let query = supabase
       .from('pattern_notes')
       .select('*')
-      .eq('chart_analysis_id', chartAnalysisId)
-      .order('created_at', { ascending: false });
+      .eq('chart_analysis_id', chartAnalysisId);
+    
+    if (userId) {
+      // Get notes that belong to the user OR are public
+      query = query.or(`user_id.eq.${userId},and(is_private.eq.false,user_id.not.is.null)`);
+    } else {
+      // If not authenticated, only show public notes
+      query = query.eq('is_private', false).not('user_id', 'is', null);
+    }
+    
+    query = query.order('created_at', { ascending: false });
+      
+    const { data: notes, error } = await query;
       
     if (error) throw error;
 
