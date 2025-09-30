@@ -27,19 +27,25 @@ serve(async (req) => {
 
     console.log('Analyzing current chart for prediction:', filename);
 
-    // First, analyze the current chart
-    const analysisResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert MNQ futures trading analyst. Analyze this current chart image to extract key temporal and pattern data for prediction analysis.
+    // First, analyze the current chart with timeout handling
+    const controller1 = new AbortController();
+    const timeoutId1 = setTimeout(() => controller1.abort(), 30000); // 30 second timeout
+
+    let analysisResponse;
+    try {
+      analysisResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        signal: controller1.signal,
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert MNQ futures trading analyst. Analyze this current chart image to extract key temporal and pattern data for prediction analysis.
 
 EXTRACT KEY FEATURES:
 - Current chart date and day of week
@@ -55,6 +61,7 @@ RESPONSE FORMAT (JSON only):
     "chart_date": "YYYY-MM-DD",
     "day_of_week": "monday/tuesday/etc",
     "price_direction": "bullish/bearish/neutral",
+    "sentiment_label": "bullish/bearish/neutral",
     "momentum": "strong/moderate/weak",
     "volume_profile": "high/normal/low",
     "session_type": "pre-market/market-open/lunch/power-hour/after-hours",
@@ -63,64 +70,156 @@ RESPONSE FORMAT (JSON only):
     "volatility": "high/medium/low"
   }
 }`
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Analyze this current MNQ chart to extract key features for prediction. Focus on current price action, momentum, volume, and key levels. Return only valid JSON.`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/png;base64,${image}`
+            },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `Analyze this current MNQ chart to extract key features for prediction. Focus on current price action, momentum, volume, and key levels. Return only valid JSON.`
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/png;base64,${image}`
+                  }
                 }
-              }
-            ]
+              ]
+            }
+          ],
+          max_tokens: 1000
+        }),
+      });
+    } catch (fetchError) {
+      clearTimeout(timeoutId1);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('Current chart analysis timed out');
+        return new Response(
+          JSON.stringify({ error: 'Analysis timed out. Please try again.' }),
+          { 
+            status: 504,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
-        ],
-        max_tokens: 1000,
-        temperature: 0.1
-      }),
-    });
+        );
+      }
+      throw fetchError;
+    }
+
+    clearTimeout(timeoutId1);
 
     if (!analysisResponse.ok) {
+      const errorText = await analysisResponse.text();
+      console.error('AI Gateway error (analysis):', analysisResponse.status, errorText);
+      
+      if (analysisResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { 
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      if (analysisResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI credits exhausted. Please add more credits.' }),
+          { 
+            status: 402,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
       throw new Error(`Analysis failed: ${analysisResponse.status}`);
     }
 
     const analysisData = await analysisResponse.json();
+    const aiResponse = analysisData.choices[0]?.message?.content;
+
+    if (!aiResponse) {
+      throw new Error('No response from AI model for current analysis');
+    }
+
+    console.log('Current analysis response length:', aiResponse.length);
+    console.log('Current analysis response preview:', aiResponse.substring(0, 200));
+
     let currentAnalysis;
     
     try {
-      const aiResponse = analysisData.choices[0]?.message?.content;
-      const cleanResponse = aiResponse.trim()
-        .replace(/```json\s*/, '')
-        .replace(/```\s*$/, '');
+      // Clean the response to remove any markdown formatting
+      let cleanResponse = aiResponse.trim();
       
+      // Remove markdown code blocks
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      }
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      }
+      
+      // Find the JSON object boundaries
       const jsonStart = cleanResponse.indexOf('{');
       const jsonEnd = cleanResponse.lastIndexOf('}');
       
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        currentAnalysis = JSON.parse(cleanResponse.substring(jsonStart, jsonEnd + 1));
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
       } else {
         throw new Error('No JSON found in response');
       }
+      
+      // Attempt to fix common truncation issues
+      if (cleanResponse.match(/:\s*"[^"]*$/)) {
+        cleanResponse = cleanResponse + '"}';
+      }
+      
+      console.log('Cleaned current analysis response:', cleanResponse.substring(0, 300));
+      currentAnalysis = JSON.parse(cleanResponse);
+      
+      console.log('Successfully parsed current analysis');
+      
     } catch (parseError) {
       console.error('Failed to parse current analysis:', parseError);
+      console.error('Failed response:', aiResponse);
+      
+      // Enhanced partial extraction with regex fallback
+      const extractField = (pattern: RegExp) => {
+        const match = aiResponse.match(pattern);
+        return match ? match[1] : null;
+      };
+      
+      const extractedDate = extractField(/"chart_date":\s*"([^"]+)"/);
+      const extractedDay = extractField(/"day_of_week":\s*"([^"]+)"/);
+      const extractedDirection = extractField(/"price_direction":\s*"([^"]+)"/);
+      const extractedSentiment = extractField(/"sentiment_label":\s*"([^"]+)"/);
+      const extractedMomentum = extractField(/"momentum":\s*"([^"]+)"/);
+      const extractedVolume = extractField(/"volume_profile":\s*"([^"]+)"/);
+      const extractedSession = extractField(/"session_type":\s*"([^"]+)"/);
+      const extractedVolatility = extractField(/"volatility":\s*"([^"]+)"/);
+      
+      console.log('Extracted fields from current analysis:', {
+        date: extractedDate,
+        day: extractedDay,
+        direction: extractedDirection,
+        sentiment: extractedSentiment
+      });
+      
       currentAnalysis = {
         current_analysis: {
-          chart_date: new Date().toISOString().split('T')[0],
-          day_of_week: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
-          price_direction: "neutral",
-          momentum: "moderate",
-          volume_profile: "normal",
-          session_type: "market-open",
+          chart_date: extractedDate || new Date().toISOString().split('T')[0],
+          day_of_week: extractedDay || new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+          price_direction: extractedDirection || "neutral",
+          sentiment_label: extractedSentiment || extractedDirection || "neutral",
+          momentum: extractedMomentum || "moderate",
+          volume_profile: extractedVolume || "normal",
+          session_type: extractedSession || "market-open",
           key_levels: [],
-          market_sentiment: "neutral",
-          volatility: "medium"
+          market_sentiment: extractedSentiment || extractedDirection || "neutral",
+          volatility: extractedVolatility || "medium"
         }
       };
+      
+      console.log('Using fallback for current analysis:', currentAnalysis);
     }
 
     // Fetch historical chart analyses for pattern matching
@@ -134,19 +233,25 @@ RESPONSE FORMAT (JSON only):
       console.error('Database error:', dbError);
     }
 
-    // Generate prediction based on current analysis and historical patterns
-    const predictionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert MNQ futures trading analyst specializing in pattern recognition and price prediction.
+    // Generate prediction based on current analysis and historical patterns with timeout handling
+    const controller2 = new AbortController();
+    const timeoutId2 = setTimeout(() => controller2.abort(), 30000); // 30 second timeout
+
+    let predictionResponse;
+    try {
+      predictionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        signal: controller2.signal,
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert MNQ futures trading analyst specializing in pattern recognition and price prediction.
 
 ANALYSIS TASK:
 - Compare current chart analysis with historical pattern data
@@ -191,58 +296,141 @@ RESPONSE FORMAT (JSON only):
     "reasoning": "Detailed explanation of prediction logic"
   }
 }`
-          },
-          {
-            role: 'user',
-            content: `CURRENT CHART ANALYSIS:
+            },
+            {
+              role: 'user',
+              content: `CURRENT CHART ANALYSIS:
 ${JSON.stringify(currentAnalysis, null, 2)}
 
 HISTORICAL PATTERNS (last 50 analyses):
 ${JSON.stringify(historicalData || [], null, 2)}
 
 Based on the current chart analysis and historical pattern data, provide a detailed prediction of where the MNQ price is headed. Focus on similar historical scenarios and their outcomes to generate specific predictions with confidence levels.`
+            }
+          ],
+          max_tokens: 1500
+        }),
+      });
+    } catch (fetchError) {
+      clearTimeout(timeoutId2);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('Prediction generation timed out');
+        return new Response(
+          JSON.stringify({ error: 'Prediction generation timed out. Please try again.' }),
+          { 
+            status: 504,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
-        ],
-        max_tokens: 2000,
-        temperature: 0.2
-      }),
-    });
+        );
+      }
+      throw fetchError;
+    }
+
+    clearTimeout(timeoutId2);
 
     if (!predictionResponse.ok) {
+      const errorText = await predictionResponse.text();
+      console.error('AI Gateway error (prediction):', predictionResponse.status, errorText);
+      
+      if (predictionResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { 
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      if (predictionResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI credits exhausted. Please add more credits.' }),
+          { 
+            status: 402,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
       throw new Error(`Prediction failed: ${predictionResponse.status}`);
     }
 
     const predictionData = await predictionResponse.json();
+    const predictionAiResponse = predictionData.choices[0]?.message?.content;
+
+    if (!predictionAiResponse) {
+      throw new Error('No response from AI model for prediction');
+    }
+
+    console.log('Prediction response length:', predictionAiResponse.length);
+    console.log('Prediction response preview:', predictionAiResponse.substring(0, 200));
+
     let prediction;
     
     try {
-      const aiResponse = predictionData.choices[0]?.message?.content;
-      const cleanResponse = aiResponse.trim()
-        .replace(/```json\s*/, '')
-        .replace(/```\s*$/, '');
+      // Clean the response to remove any markdown formatting
+      let cleanResponse = predictionAiResponse.trim();
       
+      // Remove markdown code blocks
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      }
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      }
+      
+      // Find the JSON object boundaries
       const jsonStart = cleanResponse.indexOf('{');
       const jsonEnd = cleanResponse.lastIndexOf('}');
       
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        prediction = JSON.parse(cleanResponse.substring(jsonStart, jsonEnd + 1));
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
       } else {
         throw new Error('No JSON found in response');
       }
+      
+      // Attempt to fix common truncation issues
+      if (cleanResponse.match(/:\s*"[^"]*$/)) {
+        cleanResponse = cleanResponse + '"}';
+      }
+      
+      console.log('Cleaned prediction response:', cleanResponse.substring(0, 300));
+      prediction = JSON.parse(cleanResponse);
+      
+      console.log('Successfully parsed prediction');
+      
     } catch (parseError) {
       console.error('Failed to parse prediction:', parseError);
+      console.error('Failed response:', predictionAiResponse);
+      
+      // Enhanced partial extraction with regex fallback
+      const extractField = (pattern: RegExp) => {
+        const match = predictionAiResponse.match(pattern);
+        return match ? match[1] : null;
+      };
+      
+      const extractedDirection = extractField(/"price_direction":\s*"([^"]+)"/);
+      const extractedConfidence = extractField(/"confidence_score":\s*([\d.]+)/);
+      const extractedReasoning = extractField(/"reasoning":\s*"([^"]+)"/);
+      
+      console.log('Extracted fields from prediction:', {
+        direction: extractedDirection,
+        confidence: extractedConfidence,
+        reasoning: extractedReasoning?.substring(0, 100)
+      });
+      
       prediction = {
         prediction: {
-          price_direction: "neutral",
-          confidence_score: 0.5,
+          price_direction: extractedDirection || "neutral",
+          confidence_score: extractedConfidence ? parseFloat(extractedConfidence) : 0.5,
           predicted_move: {
-            direction: "sideways",
+            direction: extractedDirection === "bullish" ? "up" : extractedDirection === "bearish" ? "down" : "sideways",
             magnitude: "small",
             target_levels: [],
             timeframe: "1hour"
           },
           similar_patterns: [],
-          risk_factors: ["insufficient historical data"],
+          risk_factors: ["incomplete analysis data"],
           trading_recommendation: {
             action: "wait",
             entry_level: null,
@@ -250,9 +438,11 @@ Based on the current chart analysis and historical pattern data, provide a detai
             take_profit: null,
             position_size: "small"
           },
-          reasoning: "Unable to generate reliable prediction due to insufficient data"
+          reasoning: extractedReasoning || "Unable to generate complete prediction due to incomplete data"
         }
       };
+      
+      console.log('Using fallback for prediction:', prediction);
     }
 
     // Store current analysis in database for future reference
@@ -264,6 +454,7 @@ Based on the current chart analysis and historical pattern data, provide a detai
           chart_date: currentAnalysis.current_analysis.chart_date,
           day_of_week: currentAnalysis.current_analysis.day_of_week,
           pattern_type: currentAnalysis.current_analysis.market_sentiment,
+          sentiment_label: currentAnalysis.current_analysis.sentiment_label || currentAnalysis.current_analysis.market_sentiment || currentAnalysis.current_analysis.price_direction,
           confidence_score: prediction?.prediction?.confidence_score || 0.5,
           price_direction: currentAnalysis.current_analysis.price_direction,
           key_levels: currentAnalysis.current_analysis.key_levels,
@@ -283,6 +474,8 @@ Based on the current chart analysis and historical pattern data, provide a detai
       
       if (insertError) {
         console.error('Error storing analysis:', insertError);
+      } else {
+        console.log('Successfully stored analysis with sentiment:', currentAnalysis.current_analysis.sentiment_label);
       }
     }
 
