@@ -74,6 +74,44 @@ const ChartPredictor: React.FC = () => {
     });
   };
 
+  const savePrediction = async (predictionData: PredictionResult) => {
+    try {
+      // Find the chart analysis by filename to link the prediction
+      const { data: chartAnalysis, error: findError } = await supabase
+        .from('chart_analyses')
+        .select('id')
+        .eq('filename', selectedFile?.name || 'unknown')
+        .maybeSingle();
+
+      if (findError) {
+        console.error('Error finding chart analysis:', findError);
+      }
+
+      // Insert prediction outcome
+      const { error: insertError } = await supabase
+        .from('prediction_outcomes')
+        .insert({
+          chart_analysis_id: chartAnalysis?.id,
+          predicted_direction: predictionData.prediction.price_direction,
+          confidence_score: predictionData.prediction.confidence_score,
+          price_target: predictionData.prediction.trading_recommendation.entry_level,
+          time_horizon_hours: 24,
+          predicted_at: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        console.error('Error saving prediction:', insertError);
+        toast({
+          title: "Warning",
+          description: "Prediction generated but failed to save to history",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error in savePrediction:', error);
+    }
+  };
+
   const predictChart = async () => {
     if (!selectedFile) return;
 
@@ -93,6 +131,10 @@ const ChartPredictor: React.FC = () => {
       }
 
       setPrediction(functionData);
+      
+      // Store prediction in database
+      await savePrediction(functionData);
+      
       toast({
         title: "Prediction Complete",
         description: `Analysis generated with ${(functionData.prediction.confidence_score * 100).toFixed(0)}% confidence`,

@@ -7,6 +7,8 @@ import { ImageUpload } from '@/components/ImageUpload';
 import { PatternAnalyzer } from '@/components/PatternAnalyzer';
 import { EnhancedPatternGallery } from '@/components/EnhancedPatternGallery';
 import ChartPredictor from '@/components/ChartPredictor';
+import PredictionHistory from '@/components/PredictionHistory';
+import DataManagement from '@/components/DataManagement';
 import { EnhancedProgressNav } from '@/components/EnhancedProgressNav';
 import { MobileOptimizedHeader } from '@/components/MobileOptimizedHeader';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
@@ -194,6 +196,10 @@ const Index = () => {
               <AnalyticsDashboard />
               
               <ChartPredictor />
+              
+              <PredictionHistory />
+              
+              <DataManagement />
               
               <div className="flex justify-center">
                 <Button variant="outline" onClick={resetWorkflow}>

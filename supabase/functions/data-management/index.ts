@@ -59,6 +59,10 @@ serve(async (req) => {
         result = await manageTags(supabase, data);
         break;
         
+      case 'reset_all_data':
+        result = await resetAllData(supabase);
+        break;
+        
       default:
         return new Response(
           JSON.stringify({ error: 'Invalid action' }),
@@ -518,4 +522,47 @@ async function manageTags(supabase: any, data: any) {
     console.error('Error managing tags:', error);
     throw error;
   }
+}
+
+// Reset all data
+async function resetAllData(supabase: any) {
+  let totalDeleted = 0;
+  
+  const tables = [
+    'pattern_notes',
+    'chart_analysis_tags',
+    'pattern_cluster_members',
+    'pattern_similarities',
+    'prediction_outcomes',
+    'chart_analyses',
+    'pattern_tags',
+    'pattern_clusters',
+    'analytics_summaries',
+    'saved_searches',
+    'export_jobs'
+  ];
+
+  for (const table of tables) {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+
+      if (error) {
+        console.error(`Error deleting from ${table}:`, error);
+      } else {
+        console.log(`Deleted from ${table}`);
+        totalDeleted += data?.length || 0;
+      }
+    } catch (err) {
+      console.error(`Exception deleting from ${table}:`, err);
+    }
+  }
+
+  return { 
+    message: 'Data reset complete', 
+    deletedRecords: totalDeleted,
+    tablesCleared: tables.length 
+  };
 }
