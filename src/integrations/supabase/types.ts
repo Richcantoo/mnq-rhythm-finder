@@ -585,60 +585,75 @@ export type Database = {
       }
       prediction_feedback: {
         Row: {
+          accuracy_score: number | null
           actual_direction: string | null
           actual_high: number | null
           actual_low: number | null
+          actual_price_move: number | null
           chart_analysis_id: string | null
           confidence_score: number
           created_at: string
           ensemble_methods: Json | null
           id: string
           notes: string | null
+          outcome_measured_at: string | null
           outcome_verified_at: string | null
           pattern_type: string | null
           points_moved: number | null
           predicted_at: string
           predicted_direction: string
+          predicted_price_target: number | null
+          predicted_timeframe_minutes: number | null
           prediction_correct: boolean | null
           profit_loss_points: number | null
           updated_at: string
           was_correct: boolean | null
         }
         Insert: {
+          accuracy_score?: number | null
           actual_direction?: string | null
           actual_high?: number | null
           actual_low?: number | null
+          actual_price_move?: number | null
           chart_analysis_id?: string | null
           confidence_score: number
           created_at?: string
           ensemble_methods?: Json | null
           id?: string
           notes?: string | null
+          outcome_measured_at?: string | null
           outcome_verified_at?: string | null
           pattern_type?: string | null
           points_moved?: number | null
           predicted_at?: string
           predicted_direction: string
+          predicted_price_target?: number | null
+          predicted_timeframe_minutes?: number | null
           prediction_correct?: boolean | null
           profit_loss_points?: number | null
           updated_at?: string
           was_correct?: boolean | null
         }
         Update: {
+          accuracy_score?: number | null
           actual_direction?: string | null
           actual_high?: number | null
           actual_low?: number | null
+          actual_price_move?: number | null
           chart_analysis_id?: string | null
           confidence_score?: number
           created_at?: string
           ensemble_methods?: Json | null
           id?: string
           notes?: string | null
+          outcome_measured_at?: string | null
           outcome_verified_at?: string | null
           pattern_type?: string | null
           points_moved?: number | null
           predicted_at?: string
           predicted_direction?: string
+          predicted_price_target?: number | null
+          predicted_timeframe_minutes?: number | null
           prediction_correct?: boolean | null
           profit_loss_points?: number | null
           updated_at?: string
