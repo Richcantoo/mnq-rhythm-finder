@@ -71,7 +71,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke('analytics-engine', {
-        body: { action: 'getAnalyticsDashboard' }
+        body: { action: 'get_analytics_dashboard' }
       });
 
       if (error) throw error;
