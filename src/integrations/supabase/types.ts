@@ -233,6 +233,48 @@ export type Database = {
         }
         Relationships: []
       }
+      market_regimes: {
+        Row: {
+          created_at: string
+          id: string
+          pattern_count: number | null
+          regime_description: string | null
+          regime_name: string
+          success_rate: number | null
+          trend_strength: string | null
+          typical_rsi_range: Json | null
+          updated_at: string
+          volatility_level: string | null
+          volume_characteristic: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pattern_count?: number | null
+          regime_description?: string | null
+          regime_name: string
+          success_rate?: number | null
+          trend_strength?: string | null
+          typical_rsi_range?: Json | null
+          updated_at?: string
+          volatility_level?: string | null
+          volume_characteristic?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pattern_count?: number | null
+          regime_description?: string | null
+          regime_name?: string
+          success_rate?: number | null
+          trend_strength?: string | null
+          typical_rsi_range?: Json | null
+          updated_at?: string
+          volatility_level?: string | null
+          volume_characteristic?: string | null
+        }
+        Relationships: []
+      }
       pattern_categories: {
         Row: {
           color_hex: string
@@ -379,6 +421,57 @@ export type Database = {
           },
         ]
       }
+      pattern_performance: {
+        Row: {
+          avg_confidence: number | null
+          avg_points_moved: number | null
+          best_performing_time: string | null
+          correct_predictions: number | null
+          created_at: string
+          day_of_week: string | null
+          id: string
+          last_updated: string
+          market_regime: string | null
+          pattern_type: string
+          session_type: string | null
+          success_rate: number | null
+          total_predictions: number | null
+          worst_performing_time: string | null
+        }
+        Insert: {
+          avg_confidence?: number | null
+          avg_points_moved?: number | null
+          best_performing_time?: string | null
+          correct_predictions?: number | null
+          created_at?: string
+          day_of_week?: string | null
+          id?: string
+          last_updated?: string
+          market_regime?: string | null
+          pattern_type: string
+          session_type?: string | null
+          success_rate?: number | null
+          total_predictions?: number | null
+          worst_performing_time?: string | null
+        }
+        Update: {
+          avg_confidence?: number | null
+          avg_points_moved?: number | null
+          best_performing_time?: string | null
+          correct_predictions?: number | null
+          created_at?: string
+          day_of_week?: string | null
+          id?: string
+          last_updated?: string
+          market_regime?: string | null
+          pattern_type?: string
+          session_type?: string | null
+          success_rate?: number | null
+          total_predictions?: number | null
+          worst_performing_time?: string | null
+        }
+        Relationships: []
+      }
       pattern_similarities: {
         Row: {
           algorithm_used: string
@@ -450,6 +543,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      prediction_feedback: {
+        Row: {
+          actual_direction: string | null
+          actual_high: number | null
+          actual_low: number | null
+          chart_analysis_id: string | null
+          confidence_score: number
+          created_at: string
+          ensemble_methods: Json | null
+          id: string
+          notes: string | null
+          outcome_verified_at: string | null
+          points_moved: number | null
+          predicted_at: string
+          predicted_direction: string
+          prediction_correct: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          actual_direction?: string | null
+          actual_high?: number | null
+          actual_low?: number | null
+          chart_analysis_id?: string | null
+          confidence_score: number
+          created_at?: string
+          ensemble_methods?: Json | null
+          id?: string
+          notes?: string | null
+          outcome_verified_at?: string | null
+          points_moved?: number | null
+          predicted_at?: string
+          predicted_direction: string
+          prediction_correct?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          actual_direction?: string | null
+          actual_high?: number | null
+          actual_low?: number | null
+          chart_analysis_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          ensemble_methods?: Json | null
+          id?: string
+          notes?: string | null
+          outcome_verified_at?: string | null
+          points_moved?: number | null
+          predicted_at?: string
+          predicted_direction?: string
+          prediction_correct?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_feedback_chart_analysis_id_fkey"
+            columns: ["chart_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "chart_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prediction_outcomes: {
         Row: {
