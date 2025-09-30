@@ -42,6 +42,12 @@ CRITICAL DATE EXTRACTION:
 - If you see a date like "9/26/2025" on the chart, use that exact date
 - Day of week must match the extracted date (9/26/2025 = Friday)
 
+SENTIMENT CLASSIFICATION (CRITICAL):
+Determine the overall market sentiment based on price action:
+- BULLISH: Strong upward momentum, higher highs/lows, buying pressure, breakouts above resistance
+- BEARISH: Strong downward momentum, lower highs/lows, selling pressure, breakdowns below support
+- NEUTRAL: Sideways movement, consolidation, no clear directional bias, range-bound
+
 TEMPORAL EXTRACTION REQUIREMENTS:
 1. Chart Date & Time: Extract exact date and all visible time stamps from chart axes, headers, or watermarks
 2. Time Range: Identify the start and end times visible on the chart
@@ -59,6 +65,7 @@ RESPONSE FORMAT (JSON only, no markdown):
 {
   "chart_date": "YYYY-MM-DD",
   "day_of_week": "monday/tuesday/wednesday/thursday/friday",
+  "sentiment_label": "bullish/bearish/neutral",
   "time_range": {
     "start_time": "HH:MM",
     "end_time": "HH:MM",
@@ -115,6 +122,7 @@ RESPONSE FORMAT (JSON only, no markdown):
                 text: `Analyze this MNQ 5-minute chart for trading patterns and opportunities. Focus on:
 - Extract the exact chart date from any visible timestamps or date information
 - Determine the day of the week from the chart date
+- **DETERMINE MARKET SENTIMENT: Classify as bullish, bearish, or neutral based on overall price action**
 - Price action patterns and trend analysis
 - Volume characteristics and spikes
 - Support and resistance levels
@@ -215,6 +223,7 @@ Return only valid JSON without any markdown formatting.`
       analysis = {
         chart_date: currentDate,
         day_of_week: dayOfWeek,
+        sentiment_label: "neutral",
         pattern_type: "neutral",
         confidence_score: 0.5,
         session_time: "market-open",

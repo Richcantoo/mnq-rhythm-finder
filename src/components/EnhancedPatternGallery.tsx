@@ -23,6 +23,7 @@ interface ChartImage {
   analysis?: {
     pattern_type: string;
     confidence_score: number;
+    sentiment_label?: string;
     session_time: string;
     key_levels: Array<{ type: string; price: number; strength: number }>;
     pattern_features: {
@@ -479,7 +480,19 @@ export function EnhancedPatternGallery({ images }: EnhancedPatternGalleryProps) 
                 viewMode === 'list' && "flex-1 flex flex-col justify-between"
               )}>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    {image.analysis?.sentiment_label && (
+                      <Badge 
+                        variant={
+                          image.analysis.sentiment_label === 'bullish' ? 'default' : 
+                          image.analysis.sentiment_label === 'bearish' ? 'destructive' : 
+                          'secondary'
+                        }
+                        className="font-semibold"
+                      >
+                        {image.analysis.sentiment_label.toUpperCase()}
+                      </Badge>
+                    )}
                     <Badge variant={getPatternVariant(image.analysis?.pattern_type || '')}>
                       {getPatternIcon(image.analysis?.pattern_type || '')} {image.analysis?.pattern_type}
                     </Badge>
@@ -536,8 +549,20 @@ export function EnhancedPatternGallery({ images }: EnhancedPatternGalleryProps) 
                           alt={`Chart ${index + 1}`}
                           className="w-full aspect-video object-cover rounded-lg mb-3"
                         />
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center justify-between">
+                         <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            {image.analysis?.sentiment_label && (
+                              <Badge 
+                                variant={
+                                  image.analysis.sentiment_label === 'bullish' ? 'default' : 
+                                  image.analysis.sentiment_label === 'bearish' ? 'destructive' : 
+                                  'secondary'
+                                }
+                                className="font-semibold"
+                              >
+                                {image.analysis.sentiment_label.toUpperCase()}
+                              </Badge>
+                            )}
                             <Badge variant={getPatternVariant(image.analysis?.pattern_type || '')}>
                               {image.analysis?.pattern_type}
                             </Badge>

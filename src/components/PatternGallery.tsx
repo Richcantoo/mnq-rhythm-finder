@@ -14,6 +14,7 @@ interface ChartImage {
     day_of_week?: string;
     pattern_type: string;
     confidence_score: number;
+    sentiment_label?: string;
     session_time: string;
     key_levels: Array<{ type: string; price: number; strength: number }>;
     pattern_features: {
@@ -191,6 +192,20 @@ export const PatternGallery = ({ images }: PatternGalleryProps) => {
                   
                   {image.analysis && (
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
+                      {image.analysis.sentiment_label && (
+                        <Badge 
+                          variant={
+                            image.analysis.sentiment_label === 'bullish' ? 'default' : 
+                            image.analysis.sentiment_label === 'bearish' ? 'destructive' : 
+                            'secondary'
+                          }
+                          className="text-xs font-semibold"
+                        >
+                          {image.analysis.sentiment_label === 'bullish' && <TrendingUp className="w-3 h-3 mr-1" />}
+                          {image.analysis.sentiment_label === 'bearish' && <TrendingDown className="w-3 h-3 mr-1" />}
+                          {image.analysis.sentiment_label.toUpperCase()}
+                        </Badge>
+                      )}
                       <Badge 
                         variant={getPatternVariant(image.analysis.pattern_type)}
                         className="text-xs"

@@ -55,6 +55,7 @@ export type Database = {
           price_direction: string | null
           search_vector: unknown | null
           seasonal_context: Json | null
+          sentiment_label: string | null
           session_details: Json | null
           temporal_patterns: Json | null
           updated_at: string
@@ -72,6 +73,7 @@ export type Database = {
           price_direction?: string | null
           search_vector?: unknown | null
           seasonal_context?: Json | null
+          sentiment_label?: string | null
           session_details?: Json | null
           temporal_patterns?: Json | null
           updated_at?: string
@@ -89,6 +91,7 @@ export type Database = {
           price_direction?: string | null
           search_vector?: unknown | null
           seasonal_context?: Json | null
+          sentiment_label?: string | null
           session_details?: Json | null
           temporal_patterns?: Json | null
           updated_at?: string

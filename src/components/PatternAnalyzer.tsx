@@ -12,6 +12,7 @@ interface ChartImage {
   analysis?: {
     pattern_type: string;
     confidence_score: number;
+    sentiment_label?: string;
     session_time: string;
     key_levels: Array<{ type: string; price: number; strength: number }>;
     pattern_features: {
@@ -82,6 +83,7 @@ export const PatternAnalyzer = ({ images, onAnalysisComplete }: PatternAnalyzerP
               day_of_week: analysisResult.day_of_week || 'unknown',
               pattern_type: analysisResult.pattern_type || 'unknown',
               confidence_score: analysisResult.confidence_score || 0,
+              sentiment_label: analysisResult.sentiment_label || 'neutral',
               price_direction: analysisResult.pattern_features?.trend_direction || 'neutral',
               key_levels: analysisResult.key_levels || [],
               pattern_features: analysisResult.pattern_features || {},
