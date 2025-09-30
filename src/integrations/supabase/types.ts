@@ -43,58 +43,97 @@ export type Database = {
       }
       chart_analyses: {
         Row: {
+          atr_value: number | null
           chart_date: string
           confidence_score: number
           created_at: string
           day_of_week: string
+          distance_from_vwap: number | null
           filename: string
           id: string
           key_levels: Json | null
+          macd_histogram: number | null
+          macd_signal: number | null
+          macd_value: number | null
+          market_regime: string | null
           pattern_features: Json | null
           pattern_type: string
           price_direction: string | null
+          resistance_levels: Json | null
+          rsi_value: number | null
           search_vector: unknown | null
           seasonal_context: Json | null
           sentiment_label: string | null
           session_details: Json | null
+          support_levels: Json | null
           temporal_patterns: Json | null
+          timeframe_alignment: Json | null
           updated_at: string
+          volatility_regime: string | null
+          volume_regime: string | null
+          volume_vs_average: number | null
         }
         Insert: {
+          atr_value?: number | null
           chart_date: string
           confidence_score: number
           created_at?: string
           day_of_week: string
+          distance_from_vwap?: number | null
           filename: string
           id?: string
           key_levels?: Json | null
+          macd_histogram?: number | null
+          macd_signal?: number | null
+          macd_value?: number | null
+          market_regime?: string | null
           pattern_features?: Json | null
           pattern_type: string
           price_direction?: string | null
+          resistance_levels?: Json | null
+          rsi_value?: number | null
           search_vector?: unknown | null
           seasonal_context?: Json | null
           sentiment_label?: string | null
           session_details?: Json | null
+          support_levels?: Json | null
           temporal_patterns?: Json | null
+          timeframe_alignment?: Json | null
           updated_at?: string
+          volatility_regime?: string | null
+          volume_regime?: string | null
+          volume_vs_average?: number | null
         }
         Update: {
+          atr_value?: number | null
           chart_date?: string
           confidence_score?: number
           created_at?: string
           day_of_week?: string
+          distance_from_vwap?: number | null
           filename?: string
           id?: string
           key_levels?: Json | null
+          macd_histogram?: number | null
+          macd_signal?: number | null
+          macd_value?: number | null
+          market_regime?: string | null
           pattern_features?: Json | null
           pattern_type?: string
           price_direction?: string | null
+          resistance_levels?: Json | null
+          rsi_value?: number | null
           search_vector?: unknown | null
           seasonal_context?: Json | null
           sentiment_label?: string | null
           session_details?: Json | null
+          support_levels?: Json | null
           temporal_patterns?: Json | null
+          timeframe_alignment?: Json | null
           updated_at?: string
+          volatility_regime?: string | null
+          volume_regime?: string | null
+          volume_vs_average?: number | null
         }
         Relationships: []
       }

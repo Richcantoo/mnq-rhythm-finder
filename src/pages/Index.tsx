@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/ImageUpload';
 import { PatternAnalyzer } from '@/components/PatternAnalyzer';
 import { EnhancedPatternGallery } from '@/components/EnhancedPatternGallery';
-import ChartPredictor from '@/components/ChartPredictor';
+import { EnhancedChartPredictor } from '@/components/EnhancedChartPredictor';
+import { PatternPerformanceMetrics } from '@/components/PatternPerformanceMetrics';
 import PredictionHistory from '@/components/PredictionHistory';
 import DataManagement from '@/components/DataManagement';
 import { EnhancedProgressNav } from '@/components/EnhancedProgressNav';
@@ -189,13 +190,43 @@ const Index = () => {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-bold text-foreground">AI Predictions & Analytics</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Get AI-powered predictions and view comprehensive analytics of your pattern database.
+                  Get AI-powered predictions with ensemble methods, technical indicators, and pattern learning.
                 </p>
+              </div>
+
+              {/* Enhanced Features Banner */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <Card className="bg-card/50 border-primary/20">
+                  <CardContent className="pt-4 pb-3 text-center">
+                    <div className="text-2xl font-bold text-primary">4</div>
+                    <div className="text-xs text-muted-foreground">Prediction Methods</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card/50 border-primary/20">
+                  <CardContent className="pt-4 pb-3 text-center">
+                    <div className="text-sm font-bold text-primary">Multi-TF</div>
+                    <div className="text-xs text-muted-foreground">5/15/60 Min Alignment</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card/50 border-primary/20">
+                  <CardContent className="pt-4 pb-3 text-center">
+                    <div className="text-sm font-bold text-primary">Tech</div>
+                    <div className="text-xs text-muted-foreground">RSI, MACD, ATR, Volume</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card/50 border-primary/20">
+                  <CardContent className="pt-4 pb-3 text-center">
+                    <div className="text-sm font-bold text-primary">Learning</div>
+                    <div className="text-xs text-muted-foreground">Continuous Improvement</div>
+                  </CardContent>
+                </Card>
               </div>
               
               <AnalyticsDashboard />
               
-              <ChartPredictor />
+              <EnhancedChartPredictor />
+              
+              <PatternPerformanceMetrics />
               
               <PredictionHistory />
               
