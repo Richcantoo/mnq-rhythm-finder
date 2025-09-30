@@ -595,11 +595,14 @@ export type Database = {
           id: string
           notes: string | null
           outcome_verified_at: string | null
+          pattern_type: string | null
           points_moved: number | null
           predicted_at: string
           predicted_direction: string
           prediction_correct: boolean | null
+          profit_loss_points: number | null
           updated_at: string
+          was_correct: boolean | null
         }
         Insert: {
           actual_direction?: string | null
@@ -612,11 +615,14 @@ export type Database = {
           id?: string
           notes?: string | null
           outcome_verified_at?: string | null
+          pattern_type?: string | null
           points_moved?: number | null
           predicted_at?: string
           predicted_direction: string
           prediction_correct?: boolean | null
+          profit_loss_points?: number | null
           updated_at?: string
+          was_correct?: boolean | null
         }
         Update: {
           actual_direction?: string | null
@@ -629,11 +635,14 @@ export type Database = {
           id?: string
           notes?: string | null
           outcome_verified_at?: string | null
+          pattern_type?: string | null
           points_moved?: number | null
           predicted_at?: string
           predicted_direction?: string
           prediction_correct?: boolean | null
+          profit_loss_points?: number | null
           updated_at?: string
+          was_correct?: boolean | null
         }
         Relationships: [
           {
